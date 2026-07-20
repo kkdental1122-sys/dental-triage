@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kyoto Dental Triage</title>
+<meta name="theme-color" content="#143F3C">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dental Triage">
+<style>
+  :root{
+    --bg:#F6F5F1;
+    --paper:#FFFFFF;
+    --ink:#1B2A28;
+    --ink-soft:#4C5B58;
+    --teal:#1F6E68;
+    --teal-dark:#143F3C;
+    --teal-pale:#E6EEEC;
+    --line:#DEDAD0;
+    --red:#B23A2C;
+    --red-bg:#FBEAE7;
+    --amber:#B9791E;
+    --amber-bg:#FBF1DF;
+    --green:#3E7D57;
+    --green-bg:#E9F3EC;
+    --radius:16px;
+    --shadow: 0 1px 2px rgba(20,30,29,.06), 0 8px 24px rgba(20,30,29,.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+  }
+  #app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    background:var(--bg);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .topbar{
+    padding:18px 20px 14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border-bottom:1px solid var(--line);
+    background:var(--paper);
+    position:sticky;
+    top:0;
+    z-index:5;
+  }
+  .topbar .back{
+    background:none;border:none;cursor:pointer;
+    width:36px;height:36px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink);flex-shrink:0;
+  }
+  .topbar .back:hover{background:var(--teal-pale);}
+  .topbar .back svg{width:20px;height:20px;}
+  .topbar .titles{flex:1;min-width:0;}
+  .topbar .kicker{
+    font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--teal);font-weight:700;margin:0 0 2px;
+  }
+  .topbar h1{
+    font-size:17px;margin:0;font-weight:700;letter-spacing:-.01em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .progress{height:3px;background:var(--line);position:relative;overflow:hidden;}
+  .progress > div{height:100%;background:var(--teal);transition:width .3s ease;}
+
+  main{flex:1;padding:22px 20px 100px;}
+
+  /* Home screen */
+  .hero{padding:8px 0 22px;}
+  .hero .mark{
+    width:52px;height:52px;border-radius:14px;background:var(--teal-dark);
+    display:flex;align-items:center;justify-content:center;margin-bottom:18px;
+  }
+  .hero .mark svg{width:28px;height:28px;stroke:#fff;}
+  .hero h1{
+    font-size:26px;line-height:1.15;letter-spacing:-.02em;margin:0 0 10px;font-weight:800;
+  }
+  .hero p{font-size:15px;line-height:1.5;color:var(--ink-soft);margin:0;}
+
+  .mode-grid{display:flex;flex-direction:column;gap:12px;margin-top:22px;}
+  .mode-card{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;text-align:left;cursor:pointer;box-shadow:var(--shadow);
+    display:flex;align-items:center;gap:14px;
+    transition:transform .12s ease, border-color .12s ease;
+  }
+  .mode-card:hover{border-color:var(--teal);transform:translateY(-1px);}
+  .mode-card:active{transform:translateY(0);}
+  .mode-card .icon{
+    width:44px;height:44px;border-radius:12px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .mode-card.patient .icon{background:var(--teal-pale);}
+  .mode-card.staff .icon{background:#EFECE3;}
+  .mode-card .icon svg{width:22px;height:22px;stroke:var(--teal-dark);}
+  .mode-card .body strong{display:block;font-size:15.5px;margin-bottom:2px;}
+  .mode-card .body span{font-size:13px;color:var(--ink-soft);}
+
+  .config-note{
+    margin-top:26px;font-size:12px;color:var(--ink-soft);
+    border-top:1px dashed var(--line);padding-top:14px;
+  }
+
+  /* Symptom grid */
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .sym-card{
+    background:var(--paper);border:1.5px solid var(--line);border-radius:14px;
+    padding:16px 12px;text-align:center;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    transition:border-color .12s ease, background .12s ease;
+  }
+  .sym-card:hover{border-color:var(--teal);}
+  .sym-card svg{width:26px;height:26px;stroke:var(--teal-dark);}
+  .sym-card span{font-size:12.5px;font-weight:600;line-height:1.3;}
+
+  /* Question screen */
+  .q-block{margin-bottom:26px;}
+  .q-block .q-label{font-size:15.5px;font-weight:700;margin-bottom:12px;line-height:1.35;}
+  .choice-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .choice-btn{
+    flex:1;min-width:90px;
+    background:var(--paper);border:1.5px solid var(--line);border-radius:12px;
+    padding:13px 10px;font-size:14px;font-weight:600;cursor:pointer;color:var(--ink);
+    transition:all .12s ease;
+  }
+  .choice-btn:hover{border-color:var(--teal);}
+  .choice-btn.selected{background:var(--teal-dark);border-color:var(--teal-dark);color:#fff;}
+
+  .slider-wrap{padding:6px 4px 0;}
+  .slider-wrap input[type=range]{width:100%;accent-color:var(--teal-dark);height:6px;}
+  .slider-labels{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+  .slider-value{
+    text-align:center;font-size:32px;font-weight:800;color:var(--teal-dark);margin:6px 0 2px;
+  }
+
+  .primary-btn{
+    width:100%;background:var(--teal-dark);color:#fff;border:none;border-radius:14px;
+    padding:16px;font-size:15.5px;font-weight:700;cursor:pointer;margin-top:6px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .primary-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .primary-btn:not(:disabled):hover{background:var(--teal);}
+  .ghost-btn{
+    width:100%;background:none;color:var(--ink-soft);border:none;
+    padding:12px;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:underline;
+  }
+
+  /* Result screen */
+  .ticket{
+    background:var(--paper);border-radius:18px;box-shadow:var(--shadow);
+    overflow:hidden;position:relative;margin-bottom:18px;
+  }
+  .ticket .band{padding:22px 20px;color:#fff;}
+  .ticket .band.EMERGENCY{background:var(--red);}
+  .ticket .band.URGENT{background:var(--amber);}
+  .ticket .band.ROUTINE{background:var(--green);}
+  .ticket .band .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;opacity:.85;font-weight:700;margin-bottom:6px;}
+  .ticket .band .headline{font-size:22px;font-weight:800;letter-spacing:-.01em;margin:0;}
+  .perforation{
+    height:0;border-top:2px dashed var(--line);position:relative;margin:0 18px;
+  }
+  .perforation::before,.perforation::after{
+    content:"";position:absolute;top:-11px;width:22px;height:22px;background:var(--bg);border-radius:50%;
+  }
+  .perforation::before{left:-29px;}
+  .perforation::after{right:-29px;}
+  .ticket .stub{padding:18px 20px 22px;}
+  .stub .row{display:flex;justify-content:space-between;font-size:13.5px;padding:7px 0;border-bottom:1px solid var(--line);}
+  .stub .row:last-child{border-bottom:none;}
+  .stub .row .k{color:var(--ink-soft);}
+  .stub .row .v{font-weight:700;text-align:right;max-width:60%;}
+
+  .section-title{font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--teal-dark);font-weight:800;margin:22px 0 10px;}
+  .care-list{margin:0;padding:0;list-style:none;}
+  .care-list li{
+    display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.45;
+  }
+  .care-list li:last-child{border-bottom:none;}
+  .care-list li svg{width:16px;height:16px;stroke:var(--teal);flex-shrink:0;margin-top:2px;}
+
+  .contact-card{
+    background:var(--teal-dark);color:#fff;border-radius:16px;padding:18px;margin-top:20px;
+  }
+  .contact-card .name{font-size:15px;font-weight:700;margin-bottom:2px;}
+  .contact-card .hours{font-size:12.5px;opacity:.75;margin-bottom:14px;}
+  .contact-card a.call{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    background:#fff;color:var(--teal-dark);border-radius:12px;padding:13px;
+    font-weight:800;font-size:15px;text-decoration:none;
+  }
+  .contact-card a.call svg{width:17px;height:17px;}
+
+  /* Staff mode (Japanese) */
+  .staff-form label{
+    display:block;font-size:13px;font-weight:700;margin:16px 0 6px;color:var(--ink);
+  }
+  .staff-form select, .staff-form input[type=text]{
+    width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--line);
+    font-size:14.5px;background:var(--paper);color:var(--ink);
+  }
+  .phrase-box{
+    background:var(--teal-pale);border-radius:14px;padding:16px;margin-top:10px;
+  }
+  .phrase-box .ph{
+    font-size:14.5px;font-weight:700;color:var(--teal-dark);margin-bottom:4px;
+  }
+  .phrase-box .jp{font-size:12px;color:var(--ink-soft);margin-bottom:12px;}
+  .phrase-box .ph:last-of-type, .phrase-box .jp:last-of-type{margin-bottom:0;}
+
+  .badge-row{display:flex;align-items:center;gap:10px;margin:16px 0 4px;}
+  .badge-pill{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;
+    font-size:13.5px;font-weight:800;
+  }
+  .badge-pill.EMERGENCY{background:var(--red-bg);color:var(--red);}
+  .badge-pill.URGENT{background:var(--amber-bg);color:var(--amber);}
+  .badge-pill.ROUTINE{background:var(--green-bg);color:var(--green);}
+  .badge-pill .dot{width:8px;height:8px;border-radius:50%;background:currentColor;}
+
+  @media (max-width:360px){
+    .grid-2{grid-template-columns:1fr 1fr;}
+    .hero h1{font-size:23px;}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============ CONFIG — edit these for your clinic ============ */
+const CONFIG = {
+  clinicNameEn: "Kondo Dental Clinic",
+  clinicNameJp: "近藤歯科クリニック",
+  phone: "+81-75-000-0000",
+  phoneDisplay: "075-000-0000",
+  hoursEn: "Mon–Sat 9:00–18:00 (closed Sun & holidays)",
+  hoursJp: "月〜土 9:00〜18:00（日祝休診）",
+  lineId: "@kondo-dental",
+  address: "Kyoto, Japan"
+};
+/* =============================================================== */
+
+const ICONS = {
+  tooth: '<path d="M12 3c-2.2 0-3.4 1.1-4.3 1.1C6.6 4.1 5.8 3 4.4 3.6 2.7 4.3 2.5 7 3 9.2c.5 2.3 1.6 4 2.1 6.6.4 2.1.9 5.2 2.4 5.2 1.7 0 1.6-3.4 2.2-5.3.3-1 .7-1.6 1.3-1.6s1 .6 1.3 1.6c.6 1.9.5 5.3 2.2 5.3 1.5 0 2-3.1 2.4-5.2.5-2.6 1.6-4.3 2.1-6.6.5-2.2.3-4.9-1.4-5.6C17.6 4.1 16.8 5.2 15.7 5.2 14.8 5.2 13.6 3 12 3z"/>',
+  pulse: '<path d="M12 3c-2.2 0-3.4 1.1-4.3 1.1C6.6 4.1 5.8 3 4.4 3.6 2.7 4.3 2.5 7 3 9.2c.5 2.3 1.6 4 2.1 6.6.4 2.1.9 5.2 2.4 5.2 1.7 0 1.6-3.4 2.2-5.3.3-1 .7-1.6 1.3-1.6s1 .6 1.3 1.6c.6 1.9.5 5.3 2.2 5.3 1.5 0 2-3.1 2.4-5.2.5-2.6 1.6-4.3 2.1-6.6.5-2.2.3-4.9-1.4-5.6C17.6 4.1 16.8 5.2 15.7 5.2 14.8 5.2 13.6 3 12 3z"/><path d="M2 13h4l1.5-3L10 17l2-8 1.5 4H22" stroke-width="1.6"/>',
+  crack: '<path d="M12 3c-2.2 0-3.4 1.1-4.3 1.1C6.6 4.1 5.8 3 4.4 3.6 2.7 4.3 2.5 7 3 9.2c.5 2.3 1.6 4 2.1 6.6.4 2.1.9 5.2 2.4 5.2 1.7 0 1.6-3.4 2.2-5.3.3-1 .7-1.6 1.3-1.6s1 .6 1.3 1.6c.6 1.9.5 5.3 2.2 5.3 1.5 0 2-3.1 2.4-5.2.5-2.6 1.6-4.3 2.1-6.6.5-2.2.3-4.9-1.4-5.6C17.6 4.1 16.8 5.2 15.7 5.2 14.8 5.2 13.6 3 12 3z"/><path d="M11 5l-2 4 2 3-1.5 4" stroke-width="1.4"/>',
+  urgent: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2" stroke-width="1.8"/>',
+  drop: '<path d="M12 3s6 7.2 6 11.5A6 6 0 0 1 6 14.5C6 10.2 12 3 12 3z"/>',
+  swell: '<circle cx="12" cy="12" r="8"/><path d="M9 15c.6-1.2 1.6-2 3-2s2.4.8 3 2" stroke-width="1.6"/>',
+  denture: '<path d="M4 14c0-4 3.5-7 8-7s8 3 8 7-3 5-8 5-8-1-8-5z"/><path d="M8 13v2M12 13v2M16 13v2" stroke-width="1.4"/>',
+  other: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2 1.9-2 3.5" stroke-width="1.7"/><circle cx="12" cy="16.3" r="0.4" fill="currentColor" stroke="none"/>',
+  chevronLeft: '<path d="M15 5l-7 7 7 7" stroke-width="2"/>',
+  patientIcon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" stroke-width="1.8"/>',
+  staffIcon: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h5" stroke-width="1.7"/>',
+  markTooth: '<path d="M16 4c-2.9 0-4.5 1.4-5.7 1.4C9 5.4 8 4 6.2 4.8 4.1 5.7 3.8 9.1 4.4 11.8c.6 3 2.1 5.3 2.8 8.8.5 2.8 1.2 6.9 3.2 6.9 2.2 0 2.1-4.5 2.9-7 .4-1.3.9-2.1 1.7-2.1s1.3.8 1.7 2.1c.8 2.5.7 7 2.9 7 2 0 2.7-4.1 3.2-6.9.7-3.5 2.2-5.8 2.8-8.8.6-2.7.4-6.1-1.9-7-1.8-.8-2.8.6-4.2.6C20.5 5.4 18.9 4 16 4z"/>',
+  check: '<path d="M5 13l4 4L19 7" stroke-width="2.2"/>',
+  callIcon: '<path d="M6 2c1 3 2 5 4 7 2 2 4 3 7 4l2-3 3 1v3c0 1-1 2-2 2C10 16 4 10 4 0v0l0 0" stroke-width="1.6"/>'
+};
+function icon(name, extra){
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" ${extra||''}>${ICONS[name]}</svg>`;
+}
+
+/* ============ Triage content (patient-facing categories) ============ */
+const CATEGORIES = [
+  {
+    id:"filling", labelEn:"Lost filling / crown", labelJp:"詰め物・被せ物が取れた", icon:"tooth",
+    questions:[
+      {id:"pain", type:"choice", labelEn:"Do you have pain right now?", labelJp:"今、痛みはありますか？",
+       options:[{v:"none",labelEn:"No pain",labelJp:"痛みなし"},{v:"mild",labelEn:"Mild",labelJp:"軽い"},{v:"severe",labelEn:"Severe",labelJp:"強い"}]},
+      {id:"edge", type:"choice", labelEn:"Is there a sharp edge or exposed nerve area?", labelJp:"鋭い部分や神経が見えている感じがありますか？",
+       options:[{v:"yes",labelEn:"Yes",labelJp:"はい"},{v:"no",labelEn:"No",labelJp:"いいえ"}]}
+    ],
+    logic:(a)=> (a.pain==="severe" || a.edge==="yes") ? "URGENT" : "ROUTINE",
+    careEn:["Avoid chewing on that side.","Rinse gently with warm water after eating.","Dental wax or temporary filling material (from a pharmacy) can cover a sharp edge.","Avoid very hot, cold, or sweet food/drink on that tooth."]
+  },
+  {
+    id:"pain", labelEn:"Toothache", labelJp:"歯が痛い", icon:"pulse",
+    questions:[
+      {id:"level", type:"slider", labelEn:"How bad is the pain? (1 = mild, 10 = worst pain ever)", labelJp:"痛みの強さは？（1〜10）", min:1, max:10, def:5},
+      {id:"swelling", type:"choice", labelEn:"Any facial or gum swelling?", labelJp:"顔や歯ぐきの腫れはありますか？",
+       options:[{v:"yes",labelEn:"Yes",labelJp:"はい"},{v:"no",labelEn:"No",labelJp:"いいえ"}]},
+      {id:"fever", type:"choice", labelEn:"Do you have a fever?", labelJp:"発熱はありますか？",
+       options:[{v:"yes",labelEn:"Yes",labelJp:"はい"},{v:"no",labelEn:"No",labelJp:"いいえ"}]}
+    ],
+    logic:(a)=>{
+      const lvl = Number(a.level||0);
+      if(lvl>=8 || a.swelling==="yes" || a.fever==="yes") return "EMERGENCY";
+      if(lvl>=4) return "URGENT";
+      return "ROUTINE";
+    },
+    careEn:["Rinse with warm salt water.","Over-the-counter pain reliever, taken as directed on the package.","Cold compress on the outside of the cheek, not directly on the tooth.","Avoid lying flat, alcohol, and very hot food or drink.","Do not place aspirin directly on the gum or tooth."]
+  },
+  {
+    id:"chip", labelEn:"Broken / chipped tooth", labelJp:"歯が欠けた・割れた", icon:"crack",
+    questions:[
+      {id:"cut", type:"choice", labelEn:"Is a sharp edge cutting your tongue or cheek?", labelJp:"鋭い部分で舌や頬を切りますか？",
+       options:[{v:"yes",labelEn:"Yes",labelJp:"はい"},{v:"no",labelEn:"No",labelJp:"いいえ"}]},
+      {id:"sens", type:"choice", labelEn:"Is the tooth very sensitive to hot/cold or air?", labelJp:"冷たい・熱い・空気にとてもしみますか？",
+       options:[{v:"yes",labelEn:"Yes",labelJp:"はい"},{v:"no",labelEn:"No",labelJp:"いいえ"}]}
+    ],
+    logic:(a)=> (a.cut==="yes" || a.sens==="yes") ? "URGENT" : "ROUTINE",
+    careEn:["Save any broken piece if you have it, in water or milk.","Cover a sharp edge with dental wax if available.","Avoid chewing on that tooth.","Rinse gently with warm water."]
+  },
+  {
+    id:"trauma", labelEn:"Knocked-out tooth / injury", labelJp:"歯がぬけた・強くぶつけた", icon:"urgent",
+    questions:[
+      {id:"adult", type:"choice", labelEn:"Is it an adult (permanent) tooth?", labelJp:"永久歯ですか？（子どもの乳歯ではない）",
+       options:[{v:"yes",labelEn:"Yes",labelJp:"はい"},{v:"unsure",labelEn:"Not sure",labelJp:"わからない"},{v:"no",labelEn:"No, baby tooth",labelJp:"乳歯"}]},
+      {id:"time", type:"choice", labelEn:"How long ago did this happen?", labelJp:"どのくらい前に起きましたか？",
+       options:[{v:"now",labelEn:"< 30 min",labelJp:"30分以内"},{v:"soon",labelEn:"30 min–2 hr",labelJp:"30分〜2時間"},{v:"later",labelEn:"> 2 hr",labelJp:"2時間以上"}]}
+    ],
+    logic:()=> "EMERGENCY",
+    careEn:["Time matters — a knocked-out adult tooth has the best chance if treated within 30–60 minutes.","Hold the tooth by the crown (top), never the root.","If dirty, rinse briefly with clean water — do not scrub.","If possible, gently place it back in the socket. If not, keep it in milk or your own saliva — do not let it dry out.","Go to the nearest available dentist immediately, even before calling ahead."]
+  },
+  {
+    id:"bleeding", labelEn:"Bleeding gums / mouth injury", labelJp:"歯ぐき・口の中からの出血", icon:"drop",
+    questions:[
+      {id:"control", type:"choice", labelEn:"Does gentle pressure with gauze/cloth stop the bleeding?", labelJp:"ガーゼなどで軽く押さえると血は止まりますか？",
+       options:[{v:"yes",labelEn:"Yes",labelJp:"はい"},{v:"no",labelEn:"No, it won't stop",labelJp:"止まらない"}]},
+      {id:"duration", type:"choice", labelEn:"How long has it been bleeding?", labelJp:"出血はどのくらい続いていますか？",
+       options:[{v:"short",labelEn:"< 15 min",labelJp:"15分未満"},{v:"long",labelEn:"> 15–20 min",labelJp:"15〜20分以上"}]}
+    ],
+    logic:(a)=> (a.control==="no" || a.duration==="long") ? "EMERGENCY" : "URGENT",
+    careEn:["Bite firmly on a clean piece of gauze or a damp tea bag for 15–20 minutes without checking repeatedly.","Sit upright, avoid spitting or rinsing forcefully.","Avoid hot drinks and strenuous activity for a few hours."]
+  },
+  {
+    id:"swelling", labelEn:"Facial swelling", labelJp:"顔の腫れ", icon:"swell",
+    questions:[
+      {id:"spread", type:"choice", labelEn:"Is the swelling near your eye/neck, or is swallowing/breathing difficult?", labelJp:"腫れが目や首の近くにある、または飲み込み・呼吸が苦しいですか？",
+       options:[{v:"yes",labelEn:"Yes",labelJp:"はい"},{v:"no",labelEn:"No",labelJp:"いいえ"}]},
+      {id:"fever", type:"choice", labelEn:"Do you have a fever?", labelJp:"発熱はありますか？",
+       options:[{v:"yes",labelEn:"Yes",labelJp:"はい"},{v:"no",labelEn:"No",labelJp:"いいえ"}]}
+    ],
+    logic:(a)=> a.spread==="yes" ? "EMERGENCY" : "URGENT",
+    careEn:["This can be a sign of infection and usually needs same-day care.","Cold compress on the outside of the face.","Stay upright, keep hydrated.","If breathing or swallowing becomes difficult, seek emergency medical care immediately (call 119)."]
+  },
+  {
+    id:"denture", labelEn:"Denture problem", labelJp:"入れ歯のトラブル", icon:"denture",
+    questions:[
+      {id:"broken", type:"choice", labelEn:"Is the denture broken or cracked?", labelJp:"入れ歯が割れた・欠けましたか？",
+       options:[{v:"yes",labelEn:"Yes",labelJp:"はい"},{v:"no",labelEn:"No",labelJp:"いいえ"}]},
+      {id:"sore", type:"choice", labelEn:"Is it causing pain or sores, or can you not wear it at all?", labelJp:"痛みや傷、まったく使えない状態ですか？",
+       options:[{v:"yes",labelEn:"Yes",labelJp:"はい"},{v:"no",labelEn:"No",labelJp:"いいえ"}]}
+    ],
+    logic:(a)=> (a.sore==="yes" || a.broken==="yes") ? "URGENT" : "ROUTINE",
+    careEn:["Do not try to glue or repair the denture yourself.","Remove it if it's causing sores, and bring it with you to the clinic.","Keep it moist (in water) when not worn."]
+  },
+  {
+    id:"other", labelEn:"Something else / not sure", labelJp:"その他・わからない", icon:"other",
+    questions:[],
+    logic:()=> "URGENT",
+    careEn:["Take a clear photo of the area if possible.","Note when the problem started and any pain level.","Contact the clinic to describe your symptoms."]
+  }
+];
+
+const LEVEL_META = {
+  EMERGENCY: {
+    headlineEn:"See a dentist today", eyebrowEn:"Emergency",
+    headlineJp:"本日中の受診が必要", eyebrowJp:"緊急",
+  },
+  URGENT: {
+    headlineEn:"See a dentist within 24–48 hours", eyebrowEn:"Urgent",
+    headlineJp:"24〜48時間以内の受診を", eyebrowJp:"至急",
+  },
+  ROUTINE: {
+    headlineEn:"Can wait — book a routine visit", eyebrowEn:"Routine",
+    headlineJp:"急がなくても大丈夫", eyebrowJp:"通常",
+  }
+};
+
+/* Staff-mode phrasebook: quick English phrases to say per outcome */
+const STAFF_PHRASES = {
+  EMERGENCY:[
+    {en:"This needs to be seen today. Can you come in right now?", jp:"本日中の受診が必要です。今すぐ来院できますか？"},
+    {en:"If you can't come in, please go to the nearest emergency dental or hospital.", jp:"来院できない場合は、最寄りの救急歯科・病院を受診してください。"}
+  ],
+  URGENT:[
+    {en:"We can see you within the next day or two. Let's find a time.", jp:"1〜2日以内にご案内できます。お時間を確認しましょう。"},
+    {en:"Please avoid chewing on that side until your appointment.", jp:"来院まではその側で噛まないようにしてください。"}
+  ],
+  ROUTINE:[
+    {en:"This can wait — let's book you a regular appointment.", jp:"急ぎではありません。通常の予約をお取りしましょう。"},
+    {en:"Please contact us again if the pain gets worse.", jp:"痛みが強くなった場合は再度ご連絡ください。"}
+  ]
+};
+
+/* ============ App state & rendering ============ */
+let state = { view:"home", mode:null, catId:null, answers:{}, qIndex:0 };
+
+function setState(patch){ state = {...state, ...patch}; render(); }
+function resetFlow(mode){ setState({view: mode==="patient" ? "patient-symptoms" : "staff-form", mode, catId:null, answers:{}, qIndex:0}); }
+
+function render(){
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+  if(state.view==="home") app.appendChild(renderHome());
+  else if(state.view==="patient-symptoms") app.appendChild(renderPatientSymptoms());
+  else if(state.view==="patient-question") app.appendChild(renderPatientQuestion());
+  else if(state.view==="patient-result") app.appendChild(renderPatientResult());
+  else if(state.view==="staff-form") app.appendChild(renderStaffForm());
+}
+
+function topbar(title, kicker, onBack, progressPct){
+  const wrap = document.createElement("div");
+  let html = `<div class="topbar">`;
+  if(onBack){
+    html += `<button class="back" id="backBtn">${icon("chevronLeft")}</button>`;
+  }
+  html += `<div class="titles">${kicker?`<p class="kicker">${kicker}</p>`:""}<h1>${title}</h1></div></div>`;
+  if(typeof progressPct==="number"){
+    html += `<div class="progress"><div style="width:${progressPct}%"></div></div>`;
+  }
+  wrap.innerHTML = html;
+  if(onBack){ wrap.querySelector("#backBtn").onclick = onBack; }
+  return wrap;
+}
+
+function renderHome(){
+  const el = document.createElement("div");
+  el.innerHTML = `
+    ${topbar("Dental Triage", "").outerHTML}
+    <main>
+      <div class="hero">
+        <div class="mark">${icon("markTooth", 'stroke-width="1.5"')}</div>
+        <h1>Dental problem while traveling?</h1>
+        <p>Answer a few quick questions to understand how urgent your situation is, and what to do next.</p>
+      </div>
+      <div class="mode-grid">
+        <button class="mode-card patient" id="goPatient">
+          <div class="icon">${icon("patientIcon")}</div>
+          <div class="body"><strong>I have a dental problem</strong><span>For patients — in English</span></div>
+        </button>
+        <button class="mode-card staff" id="goStaff">
+          <div class="icon">${icon("staffIcon")}</div>
+          <div class="body"><strong>受付・スタッフ用</strong><span>Staff triage entry — 日本語</span></div>
+        </button>
+      </div>
+      <p class="config-note">This tool gives general guidance only and does not replace an in-person dental exam. In a medical emergency, call 119.</p>
+    </main>
+  `;
+  el.querySelector("#goPatient").onclick = ()=> resetFlow("patient");
+  el.querySelector("#goStaff").onclick = ()=> resetFlow("staff");
+  return el;
+}
+
+function renderPatientSymptoms(){
+  const el = document.createElement("div");
+  const cards = CATEGORIES.map(c=>`
+    <button class="sym-card" data-id="${c.id}">
+      ${icon(c.icon)}
+      <span>${c.labelEn}</span>
+    </button>
+  `).join("");
+  el.innerHTML = `
+    ${topbar("What's the problem?", "Step 1 of 3", ()=>{}, 15).outerHTML}
+    <main>
+      <div class="grid-2">${cards}</div>
+    </main>
+  `;
+  el.querySelector("#backBtn").onclick = ()=> setState({view:"home"});
+  el.querySelectorAll(".sym-card").forEach(b=>{
+    b.onclick = ()=> setState({catId:b.dataset.id, view:"patient-question", qIndex:0, answers:{}});
+  });
+  return el;
+}
+
+function currentCategory(){ return CATEGORIES.find(c=>c.id===state.catId); }
+
+function renderPatientQuestion(){
+  const cat = currentCategory();
+  const q = cat.questions[state.qIndex];
+  if(!q){ setState({view:"patient-result"}); return document.createElement("div"); }
+
+  const el = document.createElement("div");
+  const totalSteps = cat.questions.length + 2;
+  const pct = Math.round(((state.qIndex+2)/totalSteps)*100);
+
+  let bodyHtml = "";
+  if(q.type==="choice"){
+    bodyHtml = `<div class="choice-row">${q.options.map(o=>`
+      <button class="choice-btn ${state.answers[q.id]===o.v?'selected':''}" data-v="${o.v}">${o.labelEn}</button>
+    `).join("")}</div>`;
+  } else if(q.type==="slider"){
+    const val = state.answers[q.id] ?? q.def;
+    bodyHtml = `
+      <div class="slider-wrap">
+        <div class="slider-value" id="sliderVal">${val}</div>
+        <input type="range" min="${q.min}" max="${q.max}" value="${val}" id="painSlider">
+        <div class="slider-labels"><span>Mild</span><span>Worst ever</span></div>
+      </div>`;
+  }
+
+  el.innerHTML = `
+    ${topbar(cat.labelEn, `Step ${state.qIndex+2} of ${totalSteps}`, ()=>{}, pct).outerHTML}
+    <main>
+      <div class="q-block">
+        <div class="q-label">${q.labelEn}</div>
+        ${bodyHtml}
+      </div>
+      <button class="primary-btn" id="nextBtn" ${!isAnswered(q)?'disabled':''}>Continue</button>
+    </main>
+  `;
+  el.querySelector("#backBtn").onclick = ()=>{
+    if(state.qIndex===0) setState({view:"patient-symptoms"});
+    else setState({qIndex: state.qIndex-1});
+  };
+  if(q.type==="choice"){
+    el.querySelectorAll(".choice-btn").forEach(b=>{
+      b.onclick = ()=>{
+        const answers = {...state.answers, [q.id]: b.dataset.v};
+        setState({answers});
+      };
+    });
+  } else if(q.type==="slider"){
+    const slider = el.querySelector("#painSlider");
+    const valEl = el.querySelector("#sliderVal");
+    slider.oninput = ()=>{ valEl.textContent = slider.value; };
+    slider.onchange = ()=>{
+      const answers = {...state.answers, [q.id]: Number(slider.value)};
+      setState({answers});
+    };
+    if(state.answers[q.id]===undefined){
+      state.answers[q.id]=q.def;
+    }
+  }
+  const nextBtn = el.querySelector("#nextBtn");
+  nextBtn.onclick = ()=>{
+    if(state.qIndex < cat.questions.length-1) setState({qIndex: state.qIndex+1});
+    else setState({view:"patient-result"});
+  };
+  return el;
+}
+
+function isAnswered(q){
+  if(q.type==="slider") return true;
+  return state.answers[q.id]!==undefined;
+}
+
+function computeLevel(cat, answers){ return cat.logic(answers); }
+
+function renderPatientResult(){
+  const cat = currentCategory();
+  const level = computeLevel(cat, state.answers);
+  const meta = LEVEL_META[level];
+
+  const answerRows = cat.questions.map(q=>{
+    let display = state.answers[q.id];
+    if(q.type==="choice"){
+      const opt = q.options.find(o=>o.v===display);
+      display = opt ? opt.labelEn : display;
+    } else if(q.type==="slider"){
+      display = `${display} / ${q.max}`;
+    }
+    return `<div class="row"><span class="k">${q.labelEn}</span><span class="v">${display}</span></div>`;
+  }).join("");
+
+  const care = cat.careEn.map(c=>`<li>${icon("check")}<span>${c}</span></li>`).join("");
+
+  const el = document.createElement("div");
+  el.innerHTML = `
+    ${topbar("Your result", "Step 3 of 3", ()=>{}, 100).outerHTML}
+    <main>
+      <div class="ticket" role="status" aria-live="polite">
+        <div class="band ${level}">
+          <p class="eyebrow">${meta.eyebrowEn}</p>
+          <p class="headline">${meta.headlineEn}</p>
+        </div>
+        <div class="perforation"></div>
+        <div class="stub">
+          <div class="row"><span class="k">Symptom</span><span class="v">${cat.labelEn}</span></div>
+          ${answerRows}
+        </div>
+      </div>
+
+      <p class="section-title">What to do now</p>
+      <ul class="care-list">${care}</ul>
+
+      <div class="contact-card">
+        <div class="name">${CONFIG.clinicNameEn}</div>
+        <div class="hours">${CONFIG.hoursEn}</div>
+        <a class="call" href="tel:${CONFIG.phone}">${icon("callIcon")} Call ${CONFIG.phoneDisplay}</a>
+      </div>
+
+      <button class="ghost-btn" id="restartBtn">Start over</button>
+    </main>
+  `;
+  el.querySelector("#backBtn").onclick = ()=> setState({view:"patient-question", qIndex: cat.questions.length-1});
+  el.querySelector("#restartBtn").onclick = ()=> setState({view:"home", answers:{}, catId:null});
+  return el;
+}
+
+function renderStaffForm(){
+  const cat = currentCategory() || CATEGORIES[0];
+  const answers = state.answers;
+  const level = cat.questions.length ? computeLevel(cat, answers) : null;
+  const allAnswered = cat.questions.every(q=>answers[q.id]!==undefined);
+
+  const catOptions = CATEGORIES.map(c=>`<option value="${c.id}" ${c.id===cat.id?'selected':''}>${c.labelJp}</option>`).join("");
+
+  let questionsHtml = "";
+  cat.questions.forEach(q=>{
+    if(q.type==="choice"){
+      questionsHtml += `
+        <label>${q.labelJp}</label>
+        <select data-qid="${q.id}" class="staff-q">
+          <option value="" disabled ${answers[q.id]===undefined?'selected':''}>選択してください</option>
+          ${q.options.map(o=>`<option value="${o.v}" ${answers[q.id]===o.v?'selected':''}>${o.labelJp}</option>`).join("")}
+        </select>`;
+    } else if(q.type==="slider"){
+      const val = answers[q.id] ?? q.def;
+      questionsHtml += `
+        <label>${q.labelJp}（1〜10）</label>
+        <div class="slider-wrap">
+          <div class="slider-value" id="staffSliderVal">${val}</div>
+          <input type="range" min="${q.min}" max="${q.max}" value="${val}" id="staffSlider" data-qid="${q.id}">
+        </div>`;
+    }
+  });
+
+  let resultHtml = "";
+  if(level){
+    const meta = LEVEL_META[level];
+    const phrases = STAFF_PHRASES[level].map(p=>`
+      <p class="ph">“${p.en}”</p><p class="jp">${p.jp}</p>
+    `).join("");
+    resultHtml = `
+      <div class="badge-row">
+        <span class="badge-pill ${level}"><span class="dot"></span>${meta.eyebrowJp} — ${meta.headlineJp}</span>
+      </div>
+      <p class="section-title">案内フレーズ（英語）</p>
+      <div class="phrase-box">${phrases}</div>
+    `;
+  } else if(cat.questions.length===0){
+    resultHtml = `
+      <div class="badge-row">
+        <span class="badge-pill URGENT"><span class="dot"></span>至急 — 詳細を確認</span>
+      </div>
+      <p class="section-title">案内フレーズ（英語）</p>
+      <div class="phrase-box">${STAFF_PHRASES.URGENT.map(p=>`<p class="ph">“${p.en}”</p><p class="jp">${p.jp}</p>`).join("")}</div>
+    `;
+  }
+
+  const el = document.createElement("div");
+  el.innerHTML = `
+    ${topbar("受付トリアージ", "スタッフ用").outerHTML}
+    <main>
+      <div class="staff-form">
+        <label>症状カテゴリー</label>
+        <select id="catSelect">${catOptions}</select>
+        ${questionsHtml}
+      </div>
+      ${resultHtml}
+    </main>
+  `;
+  el.querySelector("#backBtn").onclick = ()=> setState({view:"home", catId:null, answers:{}});
+  el.querySelector("#catSelect").onchange = (e)=>{
+    setState({catId:e.target.value, answers:{}});
+  };
+  el.querySelectorAll(".staff-q").forEach(sel=>{
+    sel.onchange = ()=>{
+      const answers = {...state.answers, [sel.dataset.qid]: sel.value};
+      setState({answers});
+    };
+  });
+  const staffSlider = el.querySelector("#staffSlider");
+  if(staffSlider){
+    const valEl = el.querySelector("#staffSliderVal");
+    staffSlider.oninput = ()=>{ valEl.textContent = staffSlider.value; };
+    staffSlider.onchange = ()=>{
+      const answers = {...state.answers, [staffSlider.dataset.qid]: Number(staffSlider.value)};
+      setState({answers});
+    };
+  }
+  return el;
+}
+
+render();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
