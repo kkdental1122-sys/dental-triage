@@ -255,12 +255,10 @@
 const CONFIG = {
   clinicNameEn: "Kondo Dental Clinic",
   clinicNameJp: "近藤歯科クリニック",
-  phone: "+81-75-000-0000",
-  phoneDisplay: "075-000-0000",
-  hoursEn: "Mon–Sat 9:00–18:00 (closed Sun & holidays)",
-  hoursJp: "月〜土 9:00〜18:00（日祝休診）",
-  lineId: "@kondo-dental",
-  lineUrl: "https://line.me/R/ti/p/%40kondo-dental",
+  hoursEn: "Mon–Sat 10:00–13:30 (closed Sun & holidays)",
+  hoursJp: "月〜土 10:00〜13:30（日祝休診）",
+  lineId: "@800xsczj",
+  lineUrl: "https://line.me/R/ti/p/%40800xsczj",
   address: "Kyoto, Japan"
 };
 /* =============================================================== */
@@ -604,13 +602,7 @@ function renderPatientResult(){
       <div class="contact-card">
         <div class="name">${CONFIG.clinicNameEn}</div>
         <div class="hours">${CONFIG.hoursEn}</div>
-        ${level==="EMERGENCY" ? `
-          <a class="call" href="tel:${CONFIG.phone}">${icon("callIcon")} Call ${CONFIG.phoneDisplay}</a>
-          <a class="secondary" href="${CONFIG.lineUrl}" target="_blank" rel="noopener">${icon("chatIcon")} Or message us on LINE</a>
-        ` : `
-          <a class="call" href="${CONFIG.lineUrl}" target="_blank" rel="noopener">${icon("chatIcon")} Message us on LINE</a>
-          <a class="secondary" href="tel:${CONFIG.phone}">${icon("callIcon")} Or call ${CONFIG.phoneDisplay}</a>
-        `}
+        <a class="call" href="${CONFIG.lineUrl}" target="_blank" rel="noopener">${icon("chatIcon")} Message us on LINE</a>
       </div>
 
       <button class="ghost-btn" id="restartBtn">Start over</button>
