@@ -207,6 +207,12 @@
     font-weight:800;font-size:15px;text-decoration:none;
   }
   .contact-card a.call svg{width:17px;height:17px;}
+  .contact-card a.secondary{
+    display:flex;align-items:center;justify-content:center;gap:7px;
+    margin-top:10px;color:#fff;opacity:.85;font-size:13px;font-weight:700;
+    text-decoration:underline;
+  }
+  .contact-card a.secondary svg{width:14px;height:14px;}
 
   /* Staff mode (Japanese) */
   .staff-form label{
@@ -254,6 +260,7 @@ const CONFIG = {
   hoursEn: "Mon–Sat 9:00–18:00 (closed Sun & holidays)",
   hoursJp: "月〜土 9:00〜18:00（日祝休診）",
   lineId: "@kondo-dental",
+  lineUrl: "https://line.me/R/ti/p/%40kondo-dental",
   address: "Kyoto, Japan"
 };
 /* =============================================================== */
@@ -272,7 +279,8 @@ const ICONS = {
   staffIcon: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h5" stroke-width="1.7"/>',
   markTooth: '<path d="M16 4c-2.9 0-4.5 1.4-5.7 1.4C9 5.4 8 4 6.2 4.8 4.1 5.7 3.8 9.1 4.4 11.8c.6 3 2.1 5.3 2.8 8.8.5 2.8 1.2 6.9 3.2 6.9 2.2 0 2.1-4.5 2.9-7 .4-1.3.9-2.1 1.7-2.1s1.3.8 1.7 2.1c.8 2.5.7 7 2.9 7 2 0 2.7-4.1 3.2-6.9.7-3.5 2.2-5.8 2.8-8.8.6-2.7.4-6.1-1.9-7-1.8-.8-2.8.6-4.2.6C20.5 5.4 18.9 4 16 4z"/>',
   check: '<path d="M5 13l4 4L19 7" stroke-width="2.2"/>',
-  callIcon: '<path d="M6 2c1 3 2 5 4 7 2 2 4 3 7 4l2-3 3 1v3c0 1-1 2-2 2C10 16 4 10 4 0v0l0 0" stroke-width="1.6"/>'
+  callIcon: '<path d="M6 2c1 3 2 5 4 7 2 2 4 3 7 4l2-3 3 1v3c0 1-1 2-2 2C10 16 4 10 4 0v0l0 0" stroke-width="1.6"/>',
+  chatIcon: '<path d="M4 5h16v10H8l-4 4V5z" stroke-width="1.6"/><path d="M8 9h8M8 12.5h5" stroke-width="1.5"/>'
 };
 function icon(name, extra){
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" ${extra||''}>${ICONS[name]}</svg>`;
@@ -596,7 +604,13 @@ function renderPatientResult(){
       <div class="contact-card">
         <div class="name">${CONFIG.clinicNameEn}</div>
         <div class="hours">${CONFIG.hoursEn}</div>
-        <a class="call" href="tel:${CONFIG.phone}">${icon("callIcon")} Call ${CONFIG.phoneDisplay}</a>
+        ${level==="EMERGENCY" ? `
+          <a class="call" href="tel:${CONFIG.phone}">${icon("callIcon")} Call ${CONFIG.phoneDisplay}</a>
+          <a class="secondary" href="${CONFIG.lineUrl}" target="_blank" rel="noopener">${icon("chatIcon")} Or message us on LINE</a>
+        ` : `
+          <a class="call" href="${CONFIG.lineUrl}" target="_blank" rel="noopener">${icon("chatIcon")} Message us on LINE</a>
+          <a class="secondary" href="tel:${CONFIG.phone}">${icon("callIcon")} Or call ${CONFIG.phoneDisplay}</a>
+        `}
       </div>
 
       <button class="ghost-btn" id="restartBtn">Start over</button>
